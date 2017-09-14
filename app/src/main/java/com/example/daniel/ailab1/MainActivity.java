@@ -1,23 +1,32 @@
 package com.example.daniel.ailab1;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 public class MainActivity extends AppCompatActivity {
 
-    private int x;
+    private int x = 0;
     private int smoothing = 2;
-    private int sensebility = 6;
+    private int sensebility = 2;
     Girl Blonde, Redhead, Brunete;
-    private double[] valuesArray = {0.0, 0.0, 0.0};
     TextView xValue;
     TextView sensetiveValue;
     TextView blondePercent;
     TextView redPercent;
     TextView brunetePercent;
     TextView textResult;
+    LineGraphSeries<DataPoint> seriesBlonde;
+    LineGraphSeries<DataPoint> seriesRedhead;
+    LineGraphSeries<DataPoint> seriesBrunete;
+    LineGraphSeries<DataPoint> seriesX;
+    GraphView graph;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +39,27 @@ public class MainActivity extends AppCompatActivity {
         redPercent = (TextView)findViewById(R.id.redPercent);
         brunetePercent = (TextView)findViewById(R.id.brunetePercent);
         textResult = (TextView)findViewById(R.id.textResult);
+        graph = (GraphView)findViewById(R.id.graph);
 
+        // set manual X bounds
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(1.5);
+
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(100);
+
+        // enable scaling and scrolling
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScalableY(false);
+        
         Blonde = new Girl(0, "Blonde", 100.0);
         Redhead = new Girl(50, "Redhead", 0);
         Brunete = new Girl(100, "Brunete", 0);
 
         onChanges();
+        buildGraph();
 
         final SeekBar xChanger = (SeekBar)findViewById(R.id.xChanger);
         xChanger.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -56,6 +80,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final SeekBar smoothChanger = (SeekBar)findViewById(R.id.smoothChanger);
+        smoothChanger.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                smoothing = 2 + smoothChanger.getProgress() * 2;
+                onChanges();
+            }
+        });
+
         final SeekBar sensetiveChanger = (SeekBar)findViewById(R.id.sensetiveChanger);
         sensetiveChanger.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -71,13 +114,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 sensebility = 2 + sensetiveChanger.getProgress() * 2;
-                smoothing = 4 + sensebility;
                 onChanges();
             }
         });
     }
 
     private void onChanges(){
+        double[] valuesArray = {0.0, 0.0, 0.0};
+
         /*Update here canvas (graphics) and values*/
         valuesArray[0] = function(Blonde.getShift(), sensebility, smoothing, x);
         valuesArray[1] = function(Redhead.getShift(), sensebility, smoothing, x);
@@ -91,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 (valuesArray[0] + valuesArray[1] + valuesArray[2]));
 
         xValue.setText(Integer.toString(x));
-        sensetiveValue.setText(Integer.toString(sensebility));
+        sensetiveValue.setText(Integer.toString(sensebility) + "/" + Integer.toString(smoothing));
         blondePercent.setText(Double.toString(Math.round(Blonde.getPercentage())) + "%");
         redPercent.setText(Double.toString(Math.round(Redhead.getPercentage()))  + "%");
         brunetePercent.setText(Double.toString(Math.round(Brunete.getPercentage()))  + "%");
@@ -102,6 +146,51 @@ public class MainActivity extends AppCompatActivity {
         output += toneSwitch(Brunete.getPercentage(), Brunete.getColorValue());
 
         textResult.setText(output);
+        buildGraph();
+    }
+
+    private void buildGraph(){
+        double[] valuesArray = {0.0, 0.0, 0.0};
+        graph.removeAllSeries();
+        seriesBlonde = new LineGraphSeries<DataPoint>();
+        seriesRedhead = new LineGraphSeries<DataPoint>();
+        seriesBrunete = new LineGraphSeries<DataPoint>();
+        seriesX = new LineGraphSeries<DataPoint>();
+
+        for (int i = 0; i <= 100; ++i){
+            seriesBlonde.appendData(
+                    new DataPoint(i, function(Blonde.getShift(), sensebility, smoothing, i)),
+                    true,
+                    100);
+            seriesBlonde.setColor(Color.YELLOW);
+            seriesRedhead.appendData(
+                    new DataPoint(i, function(Redhead.getShift(), sensebility, smoothing, i)),
+                    true,
+                    100);
+            seriesRedhead.setColor(Color.RED);
+            seriesBrunete.appendData(
+                    new DataPoint(i, function(Brunete.getShift(), sensebility, smoothing, i)),
+                    true,
+                    100);
+            seriesBrunete.setColor(Color.BLACK);
+            seriesX.appendData(
+                    new DataPoint(x, i - 1),
+                    true,
+                    100
+            );
+            seriesX.setColor(Color.GREEN);
+        }
+
+        graph.addSeries(seriesBlonde);
+        graph.addSeries(seriesRedhead);
+        graph.addSeries(seriesBrunete);
+        graph.addSeries(seriesX);
+
+        graph.getViewport().setMaxY(1);
+        graph.getViewport().setMaxX(150);
+
+        //graph.getViewport().setScrollable(true);
+        //graph.canScrollHorizontally(0);
     }
 
     private String toneSwitch(double perc, String hairColor){

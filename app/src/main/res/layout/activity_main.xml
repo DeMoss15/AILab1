@@ -54,11 +54,11 @@
             android:id="@+id/sensetiveValueInformField"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sensetive Value"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="51dp"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true" />
+            android:text="Sensetive Value b/c"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="51dp" />
 
         <TextView
             android:id="@+id/sensetiveValue"
@@ -76,6 +76,16 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/sensetiveValueInformField"
+            android:max="10"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="68dp" />
+
+        <SeekBar
+            android:id="@+id/smoothChanger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/sensetiveChanger"
             android:max="10"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="68dp" />
@@ -179,5 +189,11 @@
         android:text="TextView"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="137dp" />
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/textResult" />
 
 </RelativeLayout>
