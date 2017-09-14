@@ -92,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
 
         xValue.setText(Integer.toString(x));
         sensetiveValue.setText(Integer.toString(sensebility));
-        blondePercent.setText(Double.toString(Blonde.getPercentage()));
-        redPercent.setText(Double.toString(Redhead.getPercentage()));
-        brunetePercent.setText(Double.toString(Brunete.getPercentage()));
+        blondePercent.setText(Double.toString(Math.round(Blonde.getPercentage())) + "%");
+        redPercent.setText(Double.toString(Math.round(Redhead.getPercentage()))  + "%");
+        brunetePercent.setText(Double.toString(Math.round(Brunete.getPercentage()))  + "%");
 
         String output = "";
         output += toneSwitch(Blonde.getPercentage(), Blonde.getColorValue());
